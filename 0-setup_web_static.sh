@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# setup server for deployment web_static
-apt-get update -y
-apt-get upgrade -y
-apt-get install nginx -y
-mkdir -p /data/web_static
-mkdir -p /data/web_static/releases
-mkdir -p /data/web_static/shared
-mkdir -p /data/web_static/releases/test
-echo "test deploying web_static" > /data/web_static/releases/test/index.html
-ln -fs /data/web_static/releases/test /data/web_static/current
-chown -R ubuntu:ubuntu /data
-sed -i '/^\tserver_name/ a\\tlocation /hbnb_static \{\n\t\talias /data/web_static/current;\n\t\}\n' /etc/nginx/sites-available/default
-service nginx restart
+# Set up web server
+
+sudo apt-get -y update
+sudo apt-get -y upgrade
+sudo apt-get -y install nginx
+sudo mkdir -p /data/web_static/shared/ /data/web_static/releases/test/
+echo "Hello world" | sudo tee /data/web_static/releases/test/index.html
+CURRENT="/data/web_static/current"
+if [ -L "$CURRENT" ]; then
+    sudo rm "$CURRENT"
+fi
+sudo ln -s /data/web_static/releases/test/ "$CURRENT"
+sudo chown -hR ubuntu:ubuntu /data
+sudo sed -i "40i location /hbnb_static {\n\t\talias /data/web_static/current/;\n\t}\n" /etc/nginx/sites-available/default
+sudo service nginx restart
